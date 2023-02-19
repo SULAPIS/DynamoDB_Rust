@@ -1,3 +1,4 @@
+use aws_sdk_dynamodb::Client;
 use serde::{Deserialize, Serialize};
 
 pub mod auth_body;
@@ -10,4 +11,8 @@ pub struct Claims {
     pub sub: String,
     pub company: String,
     pub exp: usize,
+}
+pub struct DbState {
+    pub client: Client,
+    pub table: String,
 }

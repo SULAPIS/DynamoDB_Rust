@@ -20,7 +20,7 @@ use std::sync::Arc;
 use tokio_stream::StreamExt;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::service::login;
+use crate::{service::login, types::DbState};
 // Quick instructions
 //
 // - get an authorization token:
@@ -62,12 +62,14 @@ async fn main() {
 
     let config = aws_config::load_from_env().await;
     let client = Client::new(&config);
-    let shared_client = Arc::new(client);
-    let shared_table = Arc::new(DYNAMODB_TABLE.to_string());
+    let shared_client = Arc::new(DbState {
+        client,
+        table: DYNAMODB_TABLE.to_string(),
+    });
 
     let app = Router::new()
         .route("/login", post(login))
-        .with_state(shared_table);
+        .with_state(shared_client);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 3030));
     tracing::debug!("listening on {}", addr);
